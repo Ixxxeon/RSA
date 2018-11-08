@@ -4,9 +4,8 @@ import java.util.Scanner;
 import java.util.Random;
 public class Main {
     public static void main(String[] args) {
-        Random random = new Random();
-        long number = random.nextInt(1000) + 1000;
-        long message;
+        long number = new Random().nextInt(500) + 500;
+        String message1;
         boolean loop = true;
         Scanner in = new Scanner(System.in);
         List<Long> first = simpl(number);
@@ -16,22 +15,40 @@ public class Main {
         long f1 = getF( a1, p1);
         long d1 = getD(f1);
         long e1 = getE(f1, d1);
-        System.out.println("Открытый ключ = { " + e1 + ", " + module1 + "}");
+        System.out.println("Открытый ключ = { " + d1 + ", " + module1 + "}");
         while (loop) {
-            System.out.println("Алиса хочет отправить число - ");
-            message = in.nextLong();
-            long result1 = 1;
-            for(int i = 1; i<=e1; i++){
-                result1 = (message * result1)%module1;
+            System.out.println("Алиса хочет отправить сообщение с текстом: ");
+            System.out.println("");
+            message1 = in.nextLine();
+            char[] mesChar = message1.toCharArray();
+            long resultChar;
+            StringBuffer decod = new StringBuffer();
+            List<Long> codMess = new ArrayList<>();
+            for(int i = 0; i<mesChar.length;i++) {
+                int kodChar = (int) mesChar[i];
+                resultChar = 1;
+                for(int j = 1; j<=d1; j++){
+                    resultChar = (kodChar * resultChar)%module1;
+                }
+                codMess.add(resultChar);
             }
-            System.out.println("Алиса отправляет: " + result1);
-            long result2 = 1;
-            for(int i = 1; i<=d1; i++){
-                result2 = (result1 * result2)%module1;
+            System.out.println("Алиса отправляет: " );
+            for(int i=0;i<codMess.size();i++){
+                System.out.print(Long.toHexString(codMess.get(i)));
             }
-            System.out.println("Боб расшифровывает сообщение секретным ключом и получает: " + result2);
+            System.out.println("\n");
+
+            long result1Char;
+            for(int i = 0; i<codMess.size();i++) {
+                result1Char = 1;
+                for (int j = 0; j < e1; j++) {
+                    result1Char = (codMess.get(i) * result1Char) % module1;
+                }
+                char cur = (char) result1Char;
+                decod.append(cur);
+            }
+            System.out.println("Боб расшифровывает сообщение секретным ключом и получает: " + decod);
             System.out.println("Отправить еще сообщение? y/n");
-            in.nextLine();
             String s = in.nextLine();
             if (s.equals("n")) {
                 loop = false;
@@ -84,23 +101,25 @@ public class Main {
     }
 
     private static long getE(long f, long d) {
-        long e = 11;
-        while (true) {
-            if ((e * d) % f == 1)
-                break;
-            else
-                e++;
+        long e = new Random().nextInt(11);
+        while ((((e * d) % f) !=1) || (e==d)) {
+            e++;
         }
+        System.out.println(e);
         return e;
     }
 
     private static long getD(long f){
-        long d = f - (long) Math.random()*100;
-        for (long i = 2; i <= f; i++)
+        int er = new Random().nextInt(30000);
+        int r = (int)(Math.random()*er);
+        long d = simpl(er).get(er-r);
+        for (long i = 2; i <= f; i++) {
             if ((f % i == 0) && (d % i == 0)) {
-                d--;
+                r--;
+                d = simpl(er).get( er - r);
                 i = 1;
             }
+        }
         return d;
     }
 
